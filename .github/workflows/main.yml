@@ -13,17 +13,15 @@ on:
   # - cron: "0 3 * * 1-5"
   
 permissions:
-    id-token: write
-    contents: read
+  id-token: write
+  contents: read
 
 jobs:
-    terraform_init_and_plan:
-
-      name: terraform init and plan
-      runs-on: [self-hosted, souravrun]
-       
+  terraform_init_and_plan:
+    name: terraform init and plan
+    runs-on: [self-hosted, souravrun]
     
-      steps:
+    steps:
       - name: Checkout
         uses: actions/checkout@v5.0.0
 
@@ -33,7 +31,8 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
       - name: Terraform Init
         id: init
         run: terraform init
@@ -46,8 +45,29 @@ jobs:
         id: plan
         run: terraform plan
         continue-on-error: true
+    
+  terraform_apply:   
+    name: apply
+    runs-on: souravrun
+    needs: terraform_init_and_plan
+    environment: dev
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
 
-  
-  
-    
-    
+      - name: Azure Login
+        uses: Azure/login@v2.3.0
+        with: 
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init    
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply --auto-approve
