@@ -1,24 +1,25 @@
-name: github action code setup
+name: terraform
 
 on:
   workflow_dispatch:
   # push:
   #   branches:
-  #   - main
-  #   - 'features/**'
+  #     - main
+  #     - 'feature/**'
   # pull_request:
   #   branches:
-  #   - 'features/**'
+  #     - 'feature/**'
   # schedule:
-  # - cron: "0 3 * * 1-5"
-  
+  #   - cron: '05 8 * * *'
+
 permissions:
   id-token: write
   contents: read
-
+      
 jobs:
   terraform_init_and_plan:
-    name: terraform init and plan
+  
+    name: Terraform init and plan
     runs-on: [self-hosted, souravrun]
     
     steps:
@@ -44,13 +45,13 @@ jobs:
         id: plan
         run: terraform plan
         continue-on-error: true
-    
-  terraform_apply:   
+
+
+  terraform_apply:
     name: apply
     runs-on: souravrun
     needs: terraform_init_and_plan
     environment: dev
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v5.0.0
@@ -69,3 +70,7 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply --auto-approve
+      
+            
+ 
+          
